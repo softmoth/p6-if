@@ -1,0 +1,2 @@
+test:
+	./crypt.pl test
