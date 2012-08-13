@@ -1,15 +1,5 @@
 #! /usr/bin/env perl6
 
-role StringifyNameAttrs {
-    method Str {
-        sub name($attr) { $attr.name.substr(2) }
-        sub value($attr) { $attr.get_value(self) }
-        sub attrpair($attr) { ":{name $attr}<{value $attr}>" }
-
-        sprintf '%s[%s]', self.^name, ~map &attrpair, self.^attributes;
-    }
-}
-
 class X::IF is Exception {}
 
 class IF::Event {
@@ -17,16 +7,16 @@ class IF::Event {
     has %.attrs;
 
     method Str {
-        sprintf '%s[%s]', $.name, ~map {":{.key}<{.value}>"}, %!attrs.pairs;
+        sprintf '%s[%s]', $.name, ~(map {":{.key}<{.value}>"}, %!attrs.sort);
     }
 }
 
 class IF::EventStream {
     has IF::Event @!log;
-    has @!listeners;
+    has %!listeners;
 
     method listen(Pair $listener) {
-        @!listeners.push: $listener;
+        %!listeners{$listener.key} = $listener.value;
         return self;
     }
 
@@ -38,14 +28,17 @@ class IF::EventStream {
     }
 
     method !propagate(IF::Event $event) {
-        # FIXME: make this more efficient
-        for @!listeners».kv -> $type, $handler {
-            if $event.name ~~ $type { $handler($event); }
+        if %!listeners{$event.name} -> $handler {
+            $handler($event);
         }
     }
 
-    method since($pos = @!log.end) {
+    method log($pos = 0) {
         return @!log[$pos .. *];
+    }
+
+    method last() {
+        return self.log(@!log.end)[0];
     }
 }
 
@@ -62,57 +55,87 @@ class Game::Crypt {
             my $room := $e.attrs<room>;
             $!events.emit('DescribesRoom', :$room);
         });
-    }
 
-    method begin {
-        #die "Game already started\n" if @!events;
+        # Kick off the game!
         $!events.emit('GameBegins', :room<Clearing>);
-        return self;
     }
 
-    method current() {
-        return $!events.since($!eventPosition);
+    method events() {
+        return $!events.log($!eventPosition);
+    }
+
+    method history() {
+        return $!events.log;
+    }
+
+    method do($str) {
+        $!events.emit('DescribesRoom', :room<Clearing>);
     }
 }
 
 sub MAIN('test') {
     use Test;
 
+    # Create a new event with same shorthand as emit() uses
+    sub e($name, *%attrs) {
+        return IF::Event.new(:$name, :%attrs);
+    }
+
     class IF::Test is IF::Event {}
 
     {
-        my IF::EventStream $events .= new;
-        $events.emit('Event');
-        $events.emit('Test');
-        $events.emit('GameBegins', :room<Somewhere>);
-        is $events.since(), ['GameBegins[:room<Somewhere>]'], "Logs most recent event";
-        is $events.since(1), ['Test[]', 'GameBegins[:room<Somewhere>]'],
-            "Logs all events";
+        is e('Test', :num<100>, :foo<bar>),
+           e('Test', :foo<bar>, :num<100>),
+           "Event attributes can be listed in any order";
     }
 
     {
         my IF::EventStream $events .= new;
+        $events.emit('Event');
+        $events.emit('Test', :num<100>, :foo<bar>);
+        $events.emit('GameBegins', :room<Somewhere>);
+
+        is $events.last(), e('GameBegins', :room<Somewhere>),
+            "Logs most recent event";
+
+        is $events.log(1), [
+                e('Test', :foo<bar>, :num<100>),
+                e('GameBegins', :room<Somewhere>)
+            ], "Logs all events";
+    }
+
+    {
+        my IF::EventStream $events .= new;
+
         my %fired;
         sub fired($e) { ++%fired{$e.name}; }
+
         $events.listen('Test' => {
             fired($^event);
             $events.emit('GameBegins');
         });
+
         $events.listen('GameBegins' => &fired);
+
         $events.emit('Test');
-        is $events.since(0), ['Test[]', 'GameBegins[]'],
+        is $events.log(), [e('Test'), e('GameBegins')],
             "Event listeners can generate events";
         is %fired<Test>, 1, "Test fired one listener";
         is %fired<GameBegins>, 1, "GameBegins fired one listener";
     }
 
     {
-        my Game::Crypt $game = Game::Crypt.new.begin;
+        my Game::Crypt $game .= new;
         ok $game, "A new game is created";
-        is $game.current[0], 'GameBegins[:room<Clearing>]',
+        is $game.events[0], e('GameBegins', :room<Clearing>),
             "Starts with GameBegins";
-        is $game.current[*-1], 'DescribesRoom[:room<Clearing>]',
+        is $game.events[*-1], e('DescribesRoom', :room<Clearing>),
             "Start of game describes the initial room";
+
+        $game.do('look');
+
+        is $game.events[*-2 .. *], e('DescribesRoom', :room<Clearing>) xx 2,
+            "Looking describes the room";
     }
 
     done;
