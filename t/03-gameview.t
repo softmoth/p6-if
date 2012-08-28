@@ -3,20 +3,20 @@ use IF::Engine;
 use IF::View::Test;
 
 {
-    my IF::View $view = IF::View::Test.new;
-    my IF::Engine $engine .= new(:$view);
+    my IF::Engine $game .= new;
+    my IF::View $view = IF::View::Test.new(:events($game.events), :do-command({ $game.do($_) }));
 
     $view.expect:
         :if-begin< >,
         :in-room<Saloon>,
         :describe-room<Saloon>,
         :prompt< >;
-    $engine.begin(:room<Saloon>);
+    $game.begin(:room<Saloon>);
 
     $view.expect:
         :describe-room<Saloon>,
         :prompt< >;
-    $engine.do('look');
+    $view.input('look');
 
     $view.expect;  # Check there are no remaining expectations
 }

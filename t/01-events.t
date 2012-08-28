@@ -41,19 +41,34 @@ my &e := &IF::Events::make-event;
         'test' => &fired,
         'EOF' => {
             fired($^e);
-            # Check that emitting from 'EOF' listener doesn't trigger
-            # an infinite loop
-            $events.emit('test');
         };
 
     $events.emit('test');
-    is $events.log(), [(e('test'), e('another-event')) xx 2],
+    is $events.log(), [e('test'), e('another-event')],
         "Event listeners can generate events";
-    is %fired<test>, 4, "test fired two listeners";
-    is %fired<another-event>, 2, "another-event fired one listener";
+    is %fired<test>, 2, "test fired two listeners";
+    is %fired<another-event>, 1, "another-event fired one listener";
     is %fired<EOF>, 1, "EOF fired one listener";
 }
 
+{
+    my IF::Events $events .= new;
+
+    my %fired;
+    sub fired($e) { ++%fired{$e.name}; }
+
+    $events.listen:
+        'test' => &fired,
+        'EOF' => {
+            fired($_);
+            die "Recursion test" if %fired{.name} > 5;
+            $events.emit('test') if %fired{.name} < 5;
+        };
+
+    lives_ok { $events.emit('begin') }, "Conditional emit from EOF listener stops recursion";
+    is %fired<test>, 4, "test fired correct number of times";
+    is %fired<EOF>, 5, "EOF fired correct number of times";
+}
 done;
 
 # vim:set ft=perl6:

@@ -11,7 +11,6 @@ class IF::Events is export {
     has Event @!log;
     has %!listeners;
     has $!current-event = 0;
-    has Bool $!handling-eof-event = False;
 
     method listen(*@listeners) {
         push %!listeners{.key}, .value for @listeners;
@@ -19,8 +18,9 @@ class IF::Events is export {
     }
 
     method emit($name, *%attrs) {
+        note "#emit $name {%attrs.perl}";
         @!log.push: Event.new(:$name, :%attrs);
-        self!propagate() unless $!handling-eof-event;
+        self!propagate();
         return self;
     }
 
@@ -30,14 +30,18 @@ class IF::Events is export {
     #| all events have been processed and an outside event trigger is
     #| needed to make progress. We propagate a special 'EOF' event in
     #| that case (but don't put it in the log).
-    method !propagate () {
+    method !propagate ($recursive = False) {
+        #note "# ", Backtrace.new;  # Examine if we're recursing or not
         sub call-listeners (Event $event) {
+            #note "# CALL $event on %!listeners{}";
             if %!listeners{$event.name} -> @handlers {
-                .($event) for @handlers;
+                #note "# .....Have {+@handlers} handlers";
+                $_.($event) for @handlers;
             }
         }
 
-        return unless $!current-event == @!log.end or $!handling-eof-event;
+        #note "#\t$!current-event -> @!log[]";
+        return unless $!current-event == @!log.end or $recursive;
         while $!current-event <= @!log.end {
             my $next = +@!log;
             call-listeners($_) for @!log[$!current-event .. *];
@@ -47,12 +51,11 @@ class IF::Events is export {
         die "IF::Events error, propagate ended with cur = $!current-event, log at {+@!log}"
             unless $!current-event == +@!log;
 
-        return if $!handling-eof-event;
+        return if $recursive;
 
-        $!handling-eof-event = True;
+        note "#EOF";
         call-listeners(Event.new(:name<EOF>));
-        self!propagate();
-        $!handling-eof-event = False;
+        self!propagate(True);
     }
 
     method log ($pos = 0) {
