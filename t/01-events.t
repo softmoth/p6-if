@@ -2,28 +2,28 @@ use Test;
 
 use IF::Events;
 
-my &e := &IF::Events::makeEvent;
+my &e := &IF::Events::make-event;
 
 class IF::Test is IF::Event {}
 
 {
-    is e('Test', :num<100>, :foo<bar>),
-       e('Test', :foo<bar>, :num<100>),
+    is e('test', :num<100>, :foo<bar>),
+       e('test', :foo<bar>, :num<100>),
        "Event attributes can be listed in any order";
 }
 
 {
     my IF::Events::Stream $events .= new;
-    $events.emit('Event');
-    $events.emit('Test', :num<100>, :foo<bar>);
-    $events.emit('GameBegins', :room<Somewhere>);
+    $events.emit('event');
+    $events.emit('test', :num<100>, :foo<bar>);
+    $events.emit('some-event', :what<Something>);
 
-    is $events.last(), e('GameBegins', :room<Somewhere>),
+    is $events.last(), e('some-event', :what<Something>),
         "Logs most recent event";
 
     is $events.log(1), [
-            e('Test', :foo<bar>, :num<100>),
-            e('GameBegins', :room<Somewhere>)
+            e('test', :foo<bar>, :num<100>),
+            e('some-event', :what<Something>)
         ], "Logs all events";
 }
 
@@ -33,18 +33,20 @@ class IF::Test is IF::Event {}
     my %fired;
     sub fired($e) { ++%fired{$e.name}; }
 
-    $events.listen('Test' => {
+    $events.listen('test' => {
         fired($^event);
-        $events.emit('GameBegins');
+        $events.emit('another-event');
     });
 
-    $events.listen('GameBegins' => &fired);
+    $events.listen('another-event' => &fired);
 
-    $events.emit('Test');
-    is $events.log(), [e('Test'), e('GameBegins')],
+    $events.emit('test');
+    is $events.log(), [e('test'), e('another-event')],
         "Event listeners can generate events";
-    is %fired<Test>, 1, "Test fired one listener";
-    is %fired<GameBegins>, 1, "GameBegins fired one listener";
+    is %fired<test>, 1, "test fired one listener";
+    is %fired<another-event>, 1, "another-event fired one listener";
 }
 
 done;
+
+# vim:set ft=perl6:

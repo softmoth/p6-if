@@ -1,4 +1,3 @@
-
 class IF::Event is export {
     has $.name;
     has %.attrs;
@@ -41,7 +40,9 @@ class IF::Events::Stream is export {
 
 module IF::Events {
     # Create a new event with same shorthand as emit() uses
-    our sub makeEvent($name, *%attrs) {
+    our sub make-event($name, *%attrs) {
         return IF::Event.new(:$name, :%attrs);
     }
 }
+
+# vim:set ft=perl6:

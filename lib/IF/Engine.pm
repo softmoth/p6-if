@@ -2,7 +2,7 @@ use IF::Events;
 
 class IF::Engine {
     has $!events;
-    has $!eventPosition = 0;
+    has $!event-position = 0;
 
     has $!room;
 
@@ -12,18 +12,18 @@ class IF::Engine {
         # another events handler to override it?
         $!events //= IF::Events::Stream.new;
 
-        $!events.listen('IFBegins' => -> $e {
+        $!events.listen('if-begins' => -> $e {
             $!room = $e.attrs<room>;
-            $!events.emit('DescribesRoom', :$!room);
+            $!events.emit('describes-room', :$!room);
         });
     }
 
     method begin(:$room!) {
-        $!events.emit('IFBegins', :$room);
+        $!events.emit('if-begins', :$room);
     }
 
     method events() {
-        return $!events.log($!eventPosition);
+        return $!events.log($!event-position);
     }
 
     method history() {
@@ -31,7 +31,7 @@ class IF::Engine {
     }
 
     method do($str) {
-        $!events.emit('DescribesRoom', :$!room);
+        $!events.emit('describes-room', :$!room);
     }
 }
 
