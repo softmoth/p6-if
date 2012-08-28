@@ -1,7 +1,8 @@
 role IF::View {
-    method header (Str $msg) { !!! }
-    method info (Str $msg) { !!! }
-    method prompt (Str $msg) { !!! }
+    method prompt (Str $tag) { !!! }
+    method if-begin () { !!! }
+    method in-room (Str $tag) { !!! }
+    method describe-room (Str $tag) { !!! }
 }
 
 # vim:set ft=perl6:

@@ -13,19 +13,15 @@ class IF::View::Test does IF::View {
         @!expectations = %exp;
     }
 
-    method !validate-expectation($type, $msg) {
+    method !validate-expectation($type, $tag) {
         $_ = @!expectations.shift // :error('no expectations');
-        is "{.key}:{.value}", "$type:$msg", "Expected {.key} '{.value}'";
+        is "{.key}:{.value}", "$type:$tag", "Expected {.key} '{.value}'";
     }
-    method header ($msg) {
-        self!validate-expectation('header', $msg);
-    }
-    method info (Str $msg) {
-        self!validate-expectation('info', $msg);
-    }
-    method prompt (Str $msg = '') {
-        self!validate-expectation('prompt', $msg);
-    }
+
+    method prompt (Str $tag = '') { self!validate-expectation('prompt', $tag) }
+    method if-begin () { self!validate-expectation('if-begin', '') }
+    method in-room (Str $tag) { self!validate-expectation('in-room', $tag) }
+    method describe-room (Str $tag) { self!validate-expectation('describe-room', $tag) }
 }
 
 # vim:set ft=perl6:

@@ -15,17 +15,22 @@ class IF::Engine {
 
         $!events //= IF::Events.new;
         $!events.listen:
-            'if-begins' => -> $e {
-                $!room = $e.attrs<room>;
-                $!events.emit('describes-room', :$!room);
+            'begin' => {
+                $!room = .attrs<room>;
+                $!view.if-begin();
+                $!events.emit('enter-room', :$!room);
             },
-            'describes-room' => -> $e {
-                $!view.info("Describe {$e.attrs<room>}");
-            };
+            'enter-room' => {
+                $!view.in-room(.attrs<room>);
+                $!events.emit('describe-room', :room(.attrs<room>));
+            },
+            'describe-room' => { $!view.describe-room(.attrs<room>); },
+            'EOF' => { $!view.prompt(); },
+            ;
     }
 
     method begin(:$room!) {
-        $!events.emit('if-begins', :$room);
+        $!events.emit('begin', :$room);
     }
 
     method history() {
@@ -33,7 +38,7 @@ class IF::Engine {
     }
 
     method do($str) {
-        $!events.emit('describes-room', :$!room);
+        $!events.emit('describe-room', :$!room);
     }
 }
 

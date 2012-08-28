@@ -38,13 +38,20 @@ my &e := &IF::Events::make-event;
         },
         'another-event' => &fired,
         # Two separate 'test' listeners, will be counted twice
-        'test' => &fired;
+        'test' => &fired,
+        'EOF' => {
+            fired($^e);
+            # Check that emitting from 'EOF' listener doesn't trigger
+            # an infinite loop
+            $events.emit('test');
+        };
 
     $events.emit('test');
-    is $events.log(), [e('test'), e('another-event')],
+    is $events.log(), [(e('test'), e('another-event')) xx 2],
         "Event listeners can generate events";
-    is %fired<test>, 2, "test fired two listeners";
-    is %fired<another-event>, 1, "another-event fired one listener";
+    is %fired<test>, 4, "test fired two listeners";
+    is %fired<another-event>, 2, "another-event fired one listener";
+    is %fired<EOF>, 1, "EOF fired one listener";
 }
 
 done;
