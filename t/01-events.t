@@ -4,8 +4,6 @@ use IF::Events;
 
 my &e := &IF::Events::make-event;
 
-class IF::Test is IF::Event {}
-
 {
     is e('test', :num<100>, :foo<bar>),
        e('test', :foo<bar>, :num<100>),
@@ -13,7 +11,7 @@ class IF::Test is IF::Event {}
 }
 
 {
-    my IF::Events::Stream $events .= new;
+    my IF::Events $events .= new;
     $events.emit('event');
     $events.emit('test', :num<100>, :foo<bar>);
     $events.emit('some-event', :what<Something>);
@@ -28,7 +26,7 @@ class IF::Test is IF::Event {}
 }
 
 {
-    my IF::Events::Stream $events .= new;
+    my IF::Events $events .= new;
 
     my %fired;
     sub fired($e) { ++%fired{$e.name}; }

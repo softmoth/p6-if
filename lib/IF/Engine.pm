@@ -5,8 +5,6 @@ use IF::View::Null;
 class IF::Engine {
     has $!view;
     has $!events;
-    # TODO: Move this into IF::Events::Stream?
-    has $!event-position = 0;  #- Start of this frame of events
 
     has $!room;  #- Location of PC
 
@@ -15,7 +13,7 @@ class IF::Engine {
         # declaration, and still allow another instance to override it?
         $!view //= IF::View::Null.new;
 
-        $!events //= IF::Events::Stream.new;
+        $!events //= IF::Events.new;
         $!events.listen:
             'if-begins' => -> $e {
                 $!room = $e.attrs<room>;
@@ -28,10 +26,6 @@ class IF::Engine {
 
     method begin(:$room!) {
         $!events.emit('if-begins', :$room);
-    }
-
-    method events() {
-        return $!events.log($!event-position);
     }
 
     method history() {
