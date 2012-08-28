@@ -11,8 +11,8 @@ class IF::Events::Stream is export {
     has IF::Event @!log;
     has %!listeners;
 
-    method listen(Pair $listener) {
-        %!listeners{$listener.key} = $listener.value;
+    method listen(*@listeners) {
+        push %!listeners{.key}, .value for @listeners;
         return self;
     }
 
@@ -24,8 +24,8 @@ class IF::Events::Stream is export {
     }
 
     method !propagate(IF::Event $event) {
-        if %!listeners{$event.name} -> $handler {
-            $handler($event);
+        if %!listeners{$event.name} -> @handlers {
+            $_($event) for @handlers;
         }
     }
 

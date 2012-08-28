@@ -33,17 +33,19 @@ class IF::Test is IF::Event {}
     my %fired;
     sub fired($e) { ++%fired{$e.name}; }
 
-    $events.listen('test' => {
-        fired($^event);
-        $events.emit('another-event');
-    });
-
-    $events.listen('another-event' => &fired);
+    $events.listen:
+        'test' => {
+            fired($^event);
+            $events.emit('another-event');
+        },
+        'another-event' => &fired,
+        # Two separate 'test' listeners, will be counted twice
+        'test' => &fired;
 
     $events.emit('test');
     is $events.log(), [e('test'), e('another-event')],
         "Event listeners can generate events";
-    is %fired<test>, 1, "test fired one listener";
+    is %fired<test>, 2, "test fired two listeners";
     is %fired<another-event>, 1, "another-event fired one listener";
 }
 
