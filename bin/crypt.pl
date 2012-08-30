@@ -1,12 +1,14 @@
 #! /usr/bin/env perl6
 
-use IF::View::Std;
-use IF::Engine;
+use IF::Events;
+use IF::Model;
+use IF::View::Plain;
 
 sub MAIN() {
-    my $game = IF::Engine.new;
-    my $view = IF::View::Std.new(:events($game.events), :do-command({$game.do($_)}));
-    $game.begin(:room<Clearing>);
+    my IF::Events $events .= new;
+    my IF::Model $model .= new(:$events);
+    my IF::View $view = IF::View::Plain.new(:$events);
+    $model.begin(:room<Clearing>);
 }
 
 # vim:set ft=perl6:

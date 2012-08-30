@@ -1,15 +1,12 @@
 use IF::Events;
-use IF::View;
-use IF::View::Null;
 
-class IF::Engine {
-    has $.events;
-
+class IF::Model {
+    has $!events;
     has $!room;  #- Location of PC
 
-    submethod BUILD() {
-        $!events = IF::Events.new;
+    submethod BUILD(:$!events!) {
         $!events.listen:
+            'command' => { self.do(.attrs<input>); },
             'begin' => {
                 $!room = .attrs<room>;
                 $!events.emit('enter-room', :$!room);
@@ -22,10 +19,6 @@ class IF::Engine {
 
     method begin(:$room!) {
         $!events.emit('begin', :$room);
-    }
-
-    method history() {
-        return $!events.log;
     }
 
     method do($str) {

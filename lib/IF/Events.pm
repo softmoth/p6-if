@@ -8,7 +8,7 @@ class IF::Events is export {
         }
     }
 
-    has Event @!log;
+    has Event @.log;
     has %!listeners;
     has $!current-event = 0;
 
@@ -19,7 +19,7 @@ class IF::Events is export {
 
     method emit($name, *%attrs) {
         note "#emit $name {%attrs.perl}";
-        @!log.push: Event.new(:$name, :%attrs);
+        @!log.push: make-event($name, |%attrs);
         self!propagate();
         return self;
     }
@@ -58,15 +58,6 @@ class IF::Events is export {
         self!propagate(True);
     }
 
-    method log ($pos = 0) {
-        return @!log[$pos .. *];
-    }
-
-    method last() {
-        return self.log(@!log.end)[0];
-    }
-
-    # Create a new event with same shorthand as emit() uses
     our sub make-event($name, *%attrs) {
         return Event.new(:$name, :%attrs);
     }

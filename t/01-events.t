@@ -16,10 +16,7 @@ my &e := &IF::Events::make-event;
     $events.emit('test', :num<100>, :foo<bar>);
     $events.emit('some-event', :what<Something>);
 
-    is $events.last(), e('some-event', :what<Something>),
-        "Logs most recent event";
-
-    is $events.log(1), [
+    is $events.log[1 .. *], [
             e('test', :foo<bar>, :num<100>),
             e('some-event', :what<Something>)
         ], "Logs all events";
@@ -44,7 +41,7 @@ my &e := &IF::Events::make-event;
         };
 
     $events.emit('test');
-    is $events.log(), [e('test'), e('another-event')],
+    is $events.log[], [e('test'), e('another-event')],
         "Event listeners can generate events";
     is %fired<test>, 2, "test fired two listeners";
     is %fired<another-event>, 1, "another-event fired one listener";

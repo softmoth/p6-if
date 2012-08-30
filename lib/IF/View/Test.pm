@@ -4,7 +4,7 @@ use IF::View;
 use Test;
 
 class IF::View::Test is IF::View {
-    has @!expectations;
+    has @!artifacts;
 
     submethod BUILD (:$events!) {
         # $.events is kept in IF::View, but can't be used on partially constructed
@@ -15,30 +15,32 @@ class IF::View::Test is IF::View {
             };
     }
 
-    method expect(*%exp) {
-        # Report un-matched expectations as failures
-        my %commands = classify {.key eq 'command'}, @!expectations;
-        ok False, "Expected {.key} '{.value}'" for %commands<False> // ();
+    method prompt (Str $tag = '') {
+        @!artifacts.push: 'prompt' => '';
+    }
+    method if-begin ()              { @!artifacts.push: 'if-begin' => '' }
+    method enter-room (Str $tag)       { @!artifacts.push: 'enter-room' => $tag }
+    method describe-room (Str $tag) { @!artifacts.push: 'describe-room' => $tag }
 
-        @!expectations = @(%commands<True> // ()), %exp;
+    method input(Str $input) {
+        self.verify;  # Should be nothing pending when input is made
+        $.events.emit('command', :$input);
     }
 
     method !validate-expectation($type, $tag = '') {
-        $_ = @!expectations.shift // :error('no expectations');
-        is "{.key}:{.value}", "$type:$tag", "Expected {.key} '{.value}'";
+        $_ = @!artifacts.shift // :error('MISSING');
+        is "{.key}:{.value}", "$type:$tag", "Expected $type '$tag'";
     }
 
-    method prompt (Str $tag = '') {
-        self!validate-expectation('prompt', $tag);
-        @!expectations.push('command' => '');
-    }
-    method if-begin () { self!validate-expectation('if-begin') }
-    method in-room (Str $tag) { self!validate-expectation('in-room', $tag) }
-    method describe-room (Str $tag) { self!validate-expectation('describe-room', $tag) }
+    method verify(*@expectations) {
+        #note "# VERIFY {@!artifacts.perl}";
+        for @expectations {
+            self!validate-expectation(.key, .value);
+        }
 
-    method input(Str $command) {
-        self!validate-expectation('command');
-        &.do-command.($command);
+        is 'error' => 'UNEXPECTED', "{.key}:{.value}", "Expected {.key} '{.value}'"
+            for @!artifacts;
+        @!artifacts = ();
     }
 }
 
