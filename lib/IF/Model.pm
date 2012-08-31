@@ -14,6 +14,7 @@ class IF::Model {
             'enter-room' => {
                 $!events.emit('describe-room', :room(.attrs<room>));
             },
+            'quit' => { $!events.emit('exit') },
             ;
     }
 
@@ -21,8 +22,13 @@ class IF::Model {
         $!events.emit('begin', :$room);
     }
 
-    method do($str) {
-        $!events.emit('describe-room', :$!room);
+    method do($str is copy) {
+        $str //= 'quit';
+        given $str {
+            when 'look' { $!events.emit('describe-room', :$!room); }
+            when 'quit' { $!events.emit('quit'); }
+            default { $!events.emit('no-parse', :input($str)) }
+        }
     }
 }
 

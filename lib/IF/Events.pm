@@ -56,6 +56,19 @@ class IF::Events is export {
         note "#EOF";
         call-listeners(Event.new(:name<EOF>));
         self!propagate(True);
+
+        CATCH {
+            when 'LAST' {
+                # Jump out of event loop completely
+                self!reset;
+            }
+        }
+    }
+
+    method !reset () {
+        ++$!current-event;
+        my @pending = @!log.splice: $!current-event;
+        note "# RESET TOSSED EVENTS: @pending[]" if @pending;
     }
 
     our sub make-event($name, *%attrs) {

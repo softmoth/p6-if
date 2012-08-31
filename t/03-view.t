@@ -21,6 +21,15 @@ use IF::View::Test;
     $view.verify:
         'describe-room' => 'Saloon',
         'prompt' => '';
+
+    $view.input('abcde');
+    $view.verify:
+        'huh' => 'abcde',
+        'prompt' => '';
+
+    $view.input('quit');
+    $view.verify:
+        'exit' => '';
 }
 
 done;

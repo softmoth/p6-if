@@ -9,7 +9,6 @@ class IF::View {
             ;
     }
 
-    method prompt (Str $tag) { !!! }
     method if-begin () { !!! }
     method enter-room (Str $tag) { !!! }
     method describe-room (Str $tag) { !!! }
