@@ -36,9 +36,9 @@ class IF::View::Test is IF::View {
         @!artifacts = ();
     }
 
-    method if-begin ()              { @!artifacts.push: 'if-begin' => '' }
-    method enter-room (Str $tag)    { @!artifacts.push: 'enter-room' => $tag }
-    method describe-room (Str $tag) { @!artifacts.push: 'describe-room' => $tag }
+    method if-begin (%attrs) { @!artifacts.push: 'if-begin' => %attrs<title> }
+    method enter-room (%attrs) { @!artifacts.push: 'enter-room' => %attrs<room> }
+    method describe-room (%attrs) { @!artifacts.push: 'describe-room' => %attrs<room> }
 }
 
 # vim:set ft=perl6:

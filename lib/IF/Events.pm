@@ -24,12 +24,16 @@ class IF::Events is export {
         return self;
     }
 
-    #| Propagate events to listeners. Since listeners may call emit(),
-    #| we ensure that those subsequent events are processed *after* the
-    #| current set of events is done. This also lets us identify when
-    #| all events have been processed and an outside event trigger is
-    #| needed to make progress. We propagate a special 'EOF' event in
-    #| that case (but don't put it in the log).
+    #| Propagate events to listeners. Listeners may call emit(), and
+    #| those subsequent events are processed *after* the current set of
+    #| events is done. This ensures that, e.g., when a 'quit' listener
+    #| emits an 'exit' event, other 'quit' listeners have a chance to
+    #| fire before the 'exit' listener.
+    #|
+    #| This also lets us identify when all events have been processed
+    #| and an outside event trigger is needed to make progress. We
+    #| propagate a special 'EOF' event in that case (but don't put it in
+    #| the log).
     method !propagate ($recursive = False) {
         #note "# ", Backtrace.new;  # Examine if we're recursing or not
         sub call-listeners (Event $event) {

@@ -1,18 +1,23 @@
+use v6;
 use Test;
 use IF::Events;
 use IF::Model;
 use IF::View::Test;
 
+use lib './t';
+use TestGame;
+
 {
     my IF::Events $events .= new;
-    my IF::Model $model .= new(:$events);
-    my IF::View $view = IF::View::Test.new(:$events);
+    my TestGame $game .= new;
+    my IF::View::Test $view .= new(:$events);
+    my IF::Model $model .= new(:$events, :$game);
 
     $view.verify;  # View hasn't done anything
 
-    $model.begin(:room<Saloon>);
+    $model.begin;
     $view.verify:
-        'if-begin' => '',
+        'if-begin' => 'Dust Bowl',
         'enter-room' => 'Saloon',
         'describe-room' => 'Saloon',
         'prompt' => '';

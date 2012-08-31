@@ -1,10 +1,12 @@
+use v6;
 use IF::Events;
 
 class IF::Model {
     has $!events;
+    has $!game;
     has $!room;  #- Location of PC
 
-    submethod BUILD(:$!events!) {
+    submethod BUILD(:$!events!, :$!game!) {
         $!events.listen:
             'command' => { self.do(.attrs<input>); },
             'begin' => {
@@ -18,8 +20,12 @@ class IF::Model {
             ;
     }
 
-    method begin(:$room!) {
-        $!events.emit('begin', :$room);
+    method begin() {
+        $!events.emit: 'begin',
+            :room($!game.initial-room),
+            :title($!game.title),
+            :about($!game.about),
+            ;
     }
 
     method do($str is copy) {

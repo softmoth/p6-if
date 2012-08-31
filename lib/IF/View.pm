@@ -3,15 +3,15 @@ class IF::View {
 
     submethod BUILD (:$!events!) {
         $!events.listen:
-            'begin' => { self.if-begin() },
-            'enter-room' => { self.enter-room(.attrs<room>) },
-            'describe-room' => { self.describe-room(.attrs<room>) },
+            'begin' => { self.if-begin(.attrs) },
+            'enter-room' => { self.enter-room(.attrs) },
+            'describe-room' => { self.describe-room(.attrs) },
             ;
     }
 
-    method if-begin () { !!! }
-    method enter-room (Str $tag) { !!! }
-    method describe-room (Str $tag) { !!! }
+    method if-begin (%attrs) { !!! }
+    method enter-room (%attrs) { !!! }
+    method describe-room (%attrs) { !!! }
 }
 
 # vim:set ft=perl6:
