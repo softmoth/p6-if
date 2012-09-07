@@ -29,8 +29,8 @@ class IF::View::Plain is IF::View {
         say "== %attrs<title> ==";
         if %attrs<about> { say "\n", $^it }
     }
-    method enter-room (%attrs) { say "\n== Room: %attrs<room> ==" }
-    method describe-room (%attrs) { say "\nDescription of room %attrs<room>" }
+    method enter-room (%attrs) { say "\n== {%attrs<room>.name} ==" }
+    method describe-room (%attrs) { say "\n{%attrs<room>.description}" }
 }
 
 # vim:set ft=perl6:

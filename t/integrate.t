@@ -18,13 +18,13 @@ use TestGame;
     $model.begin;
     $view.verify:
         'if-begin' => 'Dust Bowl',
-        'enter-room' => 'Saloon',
-        'describe-room' => 'Saloon',
+        'enter-room' => $game.initial-room,
+        'describe-room' => $game.initial-room,
         'prompt' => '';
 
     $view.input('look');
     $view.verify:
-        'describe-room' => 'Saloon',
+        'describe-room' => $game.initial-room,
         'prompt' => '';
 
     $view.input('abcde');

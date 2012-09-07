@@ -9,9 +9,9 @@ use TestGame;
     my IF::Events $events .= new;
     my TestGame $game .= new(:$events);
 
-    is $game.initial-room, 'Saloon', "Initial room";
+    is $game.initial-room, $game.initial-room, "Initial room";
     is $game.title, 'Dust Bowl', "Title";
-    is $game.about, "Cowboys\nand\nOutlaws\n", "About";
+    is $game.about, "Cowboys\nand\nOutlaws", "About";
 }
 
 done;

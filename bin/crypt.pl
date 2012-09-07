@@ -2,25 +2,32 @@
 
 use v6;
 use IF::Events;
+use IF::Room;
 use IF::Game;
 use IF::Model;
 use IF::View::Plain;
 
 class Crypt does IF::Game {
     has $!events;
+    has %.rooms;
 
-    submethod BUILD (:$!events!) {}
+    submethod BUILD (:$!events!) {
+        %!rooms<Clearing> = IF::Room.new: :name('Clearing'), description => q〈
+The forest road stops here, and the gaps between the trees widen into a
+patch of un-forest. The sky above is clear apart from a few harmless clouds.
+〉;
+    }
 
     method title () { 'Crypt' }
     method about () {
-        [~]
-            "Story and gameplay from Carl Mäsak´s crypt:\n",
-            "  https://github.com/masak/crypt\n",
-            "Copyright 2012, Tim Smith <tim.dolores@gmail.com>\n",
+        join "\n",
+            "Story and gameplay from Carl Mäsak´s crypt:",
+            "  https://github.com/masak/crypt",
+            "Copyright 2012, Tim Smith <tim.dolores@gmail.com>",
             ;
     }
 
-    method initial-room () { 'Clearing' }
+    method initial-room () { %!rooms<Clearing> }
 }
 
 sub MAIN() {

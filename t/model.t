@@ -23,11 +23,11 @@ my &e := &IF::Events::make-event;
             :about($game.about),
             :title($game.title)),
         "Starts with 'begin' event";
-    is $events.log[*-1], e('describe-room', :room<Saloon>),
+    is $events.log[*-1], e('describe-room', :room($game.initial-room)),
         "Start of model describes the initial room";
 
     $model.do('look');
-    is $events.log[*-2 .. *], e('describe-room', :room<Saloon>) xx 2,
+    is $events.log[*-2 .. *], e('describe-room', :room($game.initial-room)) xx 2,
         "Looking describes the room";
 }
 
