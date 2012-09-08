@@ -3,7 +3,7 @@ use IF::Game;
 
 use IF::Room;
 
-class TestGame does IF::Game {
+class TestGame is IF::Game {
     has %.rooms;
 
     submethod BUILD {
@@ -20,15 +20,13 @@ A single card table, surrounded by four mismatched chairs, fills up most of the 
 
 sub MAIN () {
     use IF::Events;
-    use IF::Model;
     use IF::View::Plain;
 
     my IF::Events $events .= new;
     my TestGame $game .= new(:$events);
-    my IF::Model $model .= new(:$events, :$game);
     my IF::View $view = IF::View::Plain.new(:$events);
 
-    $model.begin;
+    $game.begin;
 }
 
 # vim:set ft=perl6:

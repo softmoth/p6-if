@@ -4,10 +4,9 @@ use v6;
 use IF::Events;
 use IF::Room;
 use IF::Game;
-use IF::Model;
 use IF::View::Plain;
 
-class Crypt does IF::Game {
+class Crypt is IF::Game {
     has $!events;
     has %.rooms;
 
@@ -33,10 +32,9 @@ patch of un-forest. The sky above is clear apart from a few harmless clouds.
 sub MAIN() {
     my IF::Events $events .= new;
     my Crypt $game .= new(:$events);
-    my IF::Model $model .= new(:$events, :$game);
     my IF::View $view = IF::View::Plain.new(:$events);
 
-    $model.begin;
+    $game.begin;
 }
 
 # vim:set ft=perl6:

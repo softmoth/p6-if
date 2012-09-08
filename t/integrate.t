@@ -1,7 +1,6 @@
 use v6;
 use Test;
 use IF::Events;
-use IF::Model;
 use IF::View::Test;
 
 use lib './t';
@@ -9,13 +8,12 @@ use TestGame;
 
 {
     my IF::Events $events .= new;
-    my TestGame $game .= new;
+    my TestGame $game .= new(:$events);
     my IF::View::Test $view .= new(:$events);
-    my IF::Model $model .= new(:$events, :$game);
 
     $view.verify;  # View hasn't done anything
 
-    $model.begin;
+    $game.begin;
     $view.verify:
         'if-begin' => 'Dust Bowl',
         'enter-room' => $game.initial-room,
