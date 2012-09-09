@@ -11,7 +11,7 @@ my $room = IF::Room.new: :name<ROOM>, :description('Description of room ROOM');
     my IF::Events $events .= new;
     my IF::View $view = IF::View::Test.new(:$events);
 
-    $view.verify;  # View hasn't done anything
+    $view.verify-all;  # View hasn't done anything
 
     $events.emit('begin', :title<TITLE>, :about<ABOUT>);
     $events.emit('quit');
@@ -19,7 +19,7 @@ my $room = IF::Room.new: :name<ROOM>, :description('Description of room ROOM');
     $events.emit('enter-room', :room($room));
     $events.emit('describe-room', :room($room));
 
-    $view.verify:
+    $view.verify-all:
         'if-begin' => 'TITLE', 'prompt' => '',
         'prompt' => '',  # 'quit' doesn't do anything in View::Test
         'huh' => 'INPUT', 'prompt' => '',
@@ -33,8 +33,8 @@ my $room = IF::Room.new: :name<ROOM>, :description('Description of room ROOM');
     use IF::Test;
     use IF::View::Plain;
 
-    temp $*IN  = TestIn.new;
-    temp $*OUT = TestOut.new(:save($*OUT));
+    temp $*IN  = IF::Test::In.new;
+    temp $*OUT = IF::Test::Out.new(:save($*OUT));
 
     my IF::Events $events .= new;
     my IF::View::Plain $view .= new(:$events);

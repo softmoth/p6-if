@@ -2,6 +2,7 @@ use v6;
 use IF::View;
 
 use Test;
+use IF::Test;
 
 class IF::View::Test is IF::View {
     has @!artifacts;
@@ -20,12 +21,11 @@ class IF::View::Test is IF::View {
     }
 
     method input(Str $input) {
-        self.verify;  # Should be nothing pending when input is made
         $.events.emit('command', :$input);
     }
 
-    method verify(*@expectations) {
-        #note "# VERIFY {@!artifacts.perl}";
+    method verify-all(*@expectations) {
+        #note "# VERIFY-ALL {@!artifacts.perl}";
         for @expectations {
             my $a = @!artifacts.shift // :error('MISSING');
             is "{$a.key}:{$a.value}", "{.key}:{.value}", "Expected {.key} '{.value}'";
@@ -33,6 +33,29 @@ class IF::View::Test is IF::View {
 
         is 'error' => 'UNEXPECTED', "{.key}:{.value}", "Expected {.key} '{.value}'"
             for @!artifacts;
+        @!artifacts = ();
+    }
+
+    # Expectations need to be in order, but just skip over non-matching
+    # artifacts silently
+    method verify(*@expectations) {
+        my @passed;
+        my @working;
+        while @expectations.shift -> $e {
+            if @!artifacts.shift -> $a {
+                push @working, $a;
+                redo unless $a.key eq $e.key and check($a.value, $e.value);
+
+                ok True, "Expected {$e.key} '{$e.value}'";
+                @passed.push: @working;
+                @working = ();
+                next;
+            }
+
+            report False, "Verify", {:@passed, :@working}, @expectations.unshift($e);
+            last;
+        }
+
         @!artifacts = ();
     }
 

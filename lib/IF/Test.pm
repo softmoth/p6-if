@@ -1,7 +1,30 @@
-use v6;
-use Test;
+module IF::Test;
 
-class TestOut {
+use Test;
+# Rakudo NYI
+#use Test :EXPORT;
+
+our sub report ($passed, $reason, $got, $expected) is export {
+    ok $passed, $reason;
+    if !$passed {
+        my $got_perl      = try { $got.perl };
+        my $expected_perl = try { $expected.perl };
+        if $got_perl.defined && $expected_perl.defined {
+            diag "     got: $got_perl";
+            diag "expected: $expected_perl";
+        }
+    }
+
+}
+our sub check ($got, $expected) is export {
+    given $expected {
+        when Regex { $got ~~ $expected }
+        when Code  { $expected.($got) }
+        default    { ~$got eq ~$expected }
+    }
+}
+
+class IF::Test::Out {
     has $!save;
     has $.out = '';
 
@@ -16,19 +39,14 @@ class TestOut {
     }
     method verify ($reason, $test) {
         temp $*OUT = $!save;
-        given $test {
-            sub report ($bool, $reason, $val) {
-                ok $bool, $reason ~ ($bool ?? '' !! ", got '$val'");
-            }
-            when Regex { report $!out ~~ $test, $reason, $!out; }
-            when Code  { report $test.($!out), $reason, $!out; }
-            default    { is $!out, $test, $reason; }
-        }
+        report(check($!out, $test), $reason, $!out, $test);
         $!out = '';
     }
 }
 
-class TestIn {
+class IF::Test::In {
     method get () { 'INPUT' }
     method eof () { True }  # Disable input
 }
+
+# vim:set ft=perl6:
