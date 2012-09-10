@@ -18,7 +18,10 @@ class IF::Events is export {
     }
 
     method emit($name, *%attrs) {
-        note "#emit $name {%attrs.perl}";
+        # NB: Rakudo and Niecza .perl don't handle data structures with cycles,
+        # and will just loop forever. So avoid using .perl on %attrs, since
+        # rooms have circular references
+        note "#emit $name {%attrs.Str}" if %*ENV<IF_EVENT_DEBUG_HACK>;
         @!log.push: make-event($name, |%attrs);
         self!propagate();
         return self;
@@ -57,7 +60,7 @@ class IF::Events is export {
 
         return if $recursive;
 
-        note "#EOF";
+        note "#EOF" if %*ENV<IF_EVENT_DEBUG_HACK>;
         call-listeners(Event.new(:name<EOF>));
         self!propagate(True);
 

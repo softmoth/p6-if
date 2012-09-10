@@ -10,11 +10,11 @@ class IF::Game {
         $!events.listen:
             'command' => { self!do(.attrs<input>); },
             'begin' => {
-                $!room = .attrs<room>;
-                $!events.emit('enter-room', :$!room);
+                $!events.emit('enter-room', :room(.attrs<room>));
             },
             'enter-room' => {
-                $!events.emit('describe-room', :room(.attrs<room>));
+                $!room = .attrs<room>;
+                $!events.emit('describe-room', :$!room);
             },
             'quit' => { $!events.emit('exit') },
             ;
@@ -34,7 +34,12 @@ class IF::Game {
 
     method !do($str is copy) {
         $str //= 'quit';
+        $str .= trim;
         given $str {
+            when '' {}
+            when / ^ ['go' \s+]? (<{ join '|', IF::Room.directions }>) $ / {
+                $!events.emit('enter-room', :room($!room.exits{$0}));
+            }
             when 'look' { $!events.emit('describe-room', :$!room); }
             when 'quit' { $!events.emit('quit'); }
             default { $!events.emit('no-parse', :input($str)) }

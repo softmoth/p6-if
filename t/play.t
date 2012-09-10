@@ -39,6 +39,17 @@ use TestGame;
 
     $view.input('look');
     $view.verify: 'describe-room' => $game.initial-room;
+
+    $view.input('go south');
+    $view.verify:
+        'enter-room' => $game.rooms<Street>,
+        'describe-room' => $game.rooms<Street>,
+        ;
+
+    $view.input('north');
+    $view.verify: 'enter-room' => $game.rooms<Saloon>,
+        'describe-room' => $game.rooms<Saloon>,
+        ;
 }
 
 done;

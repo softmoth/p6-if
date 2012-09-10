@@ -12,6 +12,12 @@ It feels more like a large closet than a room. The walls seem to be made of scra
 
 A single card table, surrounded by four mismatched chairs, fills up most of the available room.
 〉;
+
+        %!rooms<Street> = IF::Room.new: :name<Street>, description => q〈
+God, the sun is bright. Illuminating the emptiness of the street. The street isn't so much dusty; it's more rock-hard clay, cracked deeply enough to tell you it hasn't rained here for months. The only signs of life are the occasional cough or laugh coming from the saloon to the north.
+〉;
+
+        %!rooms<Saloon>.connect('south', %!rooms<Street>);
     }
     method title () { 'Dust Bowl' }
     method about () { "Cowboys\nand\nOutlaws" }

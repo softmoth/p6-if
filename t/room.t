@@ -18,7 +18,7 @@ my $r2 = IF::Room.new: :name('Room Two'), description => q〈
 Description of Room Two here.
 〉;
 
-$r1.connect(south, $r2);
+$r1.connect('south', $r2);
 
 is $r1.name, 'Room One', "Name";
 is $r1.description, "Line 1\nLine 2\n\nLine 3\n\nLine 4\nLine 5", "Description";
